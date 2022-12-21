@@ -92,10 +92,19 @@ Operating system defines, see http://sourceforge.net/p/predef/wiki/OperatingSyst
 #define PX_WIN64 1
 #elif defined(_WIN32) // note: _M_PPC implies _WIN32
 #define PX_WIN32 1
-#elif defined(__linux__) || defined(__EMSCRIPTEN__)
+#elif defined(__ANDROID__)
+#define PX_ANDROID 1
+#elif defined(__linux__) || defined(__EMSCRIPTEN__) // note: __ANDROID__ implies __linux__
 #define PX_LINUX 1
 #elif defined(__APPLE__)
+#include <TargetConditionals.h>
+#if TARGET_OS_IPHONE
+#define PX_IOS 1
+#elif TARGET_OS_OSX
 #define PX_OSX 1
+#else
+#error "Unknown Apple target OS"
+#endif
 #elif defined(__NX__)
 #define PX_SWITCH 1
 #else

@@ -45,85 +45,86 @@ physx::Mutex& getTempAllocMutex();
 
 namespace physx
 {
-union PxTempAllocatorChunk
-{
-	PxTempAllocatorChunk* mNext; // while chunk is free
-	PxU32 mIndex;           // while chunk is allocated
-	PxU8 mPad[16];          // 16 byte aligned allocations
-};
-namespace
-{
-typedef PxTempAllocatorChunk Chunk;
+    union PxTempAllocatorChunk
+    {
+        PxTempAllocatorChunk* mNext; // while chunk is free
+        PxU32 mIndex;                // while chunk is allocated
+        PxU8 mPad[16];               // 16 byte aligned allocations
+    };
 
-const PxU32 sMinIndex = 8;  // 256B min
-const PxU32 sMaxIndex = 17; // 128kB max
-}
+    namespace
+    {
+        typedef PxTempAllocatorChunk Chunk;
 
-void* PxTempAllocator::allocate(size_t size, const char* filename, PxI32 line)
-{
-	if(!size)
-		return 0;
+        const PxU32 sMinIndex = 8;  // 256B min
+        const PxU32 sMaxIndex = 17; // 128kB max
+    } // namespace
 
-	PxU32 index = PxMax(PxHighestSetBit(PxU32(size) + sizeof(Chunk) - 1), sMinIndex);
+    void* PxTempAllocator::allocate(size_t size, const char* filename, PxI32 line)
+    {
+        if (!size)
+            return 0;
 
-	Chunk* chunk = 0;
-	if(index < sMaxIndex)
-	{
-		Mutex::ScopedLock lock(getTempAllocMutex());
+        PxU32 index = PxMax(PxHighestSetBit(static_cast<uint32_t>(PxU32(size) + sizeof(Chunk) - 1)), sMinIndex);
 
-		// find chunk up to 16x bigger than necessary
-		AllocFreeTable& freeTable = getTempAllocFreeTable();
-		Chunk** it = freeTable.begin() + index - sMinIndex;
-		Chunk** end = PxMin(it + 3, freeTable.end());
-		while(it < end && !(*it))
-			++it;
+        Chunk* chunk = 0;
+        if (index < sMaxIndex)
+        {
+            Mutex::ScopedLock lock(getTempAllocMutex());
 
-		if(it < end)
-		{
-			// pop top off freelist
-			chunk = *it;
-			*it = chunk->mNext;
-			index = PxU32(it - freeTable.begin() + sMinIndex);
-		}
-		else
-			// create new chunk
-			chunk = reinterpret_cast<Chunk*>(PxAllocator().allocate(size_t(2 << index), filename, line));
-	}
-	else
-	{
-		// too big for temp allocation, forward to base allocator
-		chunk = reinterpret_cast<Chunk*>(PxAllocator().allocate(size + sizeof(Chunk), filename, line));
-	}
+            // find chunk up to 16x bigger than necessary
+            AllocFreeTable& freeTable = getTempAllocFreeTable();
+            Chunk** it = freeTable.begin() + index - sMinIndex;
+            Chunk** end = PxMin(it + 3, freeTable.end());
+            while (it < end && !(*it))
+                ++it;
 
-	chunk->mIndex = index;
-	void* ret = chunk + 1;
-	PX_ASSERT((size_t(ret) & 0xf) == 0); // SDK types require at minimum 16 byte alignment.
-	return ret;
-}
+            if (it < end)
+            {
+                // pop top off freelist
+                chunk = *it;
+                *it = chunk->mNext;
+                index = PxU32(it - freeTable.begin() + sMinIndex);
+            }
+            else
+                // create new chunk
+                chunk = reinterpret_cast<Chunk*>(PxAllocator().allocate(size_t(2 << index), filename, line));
+        }
+        else
+        {
+            // too big for temp allocation, forward to base allocator
+            chunk = reinterpret_cast<Chunk*>(PxAllocator().allocate(size + sizeof(Chunk), filename, line));
+        }
 
-void PxTempAllocator::deallocate(void* ptr)
-{
-	if(!ptr)
-		return;
+        chunk->mIndex = index;
+        void* ret = chunk + 1;
+        PX_ASSERT((size_t(ret) & 0xf) == 0); // SDK types require at minimum 16 byte alignment.
+        return ret;
+    }
 
-	Chunk* chunk = reinterpret_cast<Chunk*>(ptr) - 1;
-	PxU32 index = chunk->mIndex;
+    void PxTempAllocator::deallocate(void* ptr)
+    {
+        if (!ptr)
+            return;
 
-	if(index >= sMaxIndex)
-		return PxAllocator().deallocate(chunk);
+        Chunk* chunk = reinterpret_cast<Chunk*>(ptr) - 1;
+        PxU32 index = chunk->mIndex;
 
-	Mutex::ScopedLock lock(getTempAllocMutex());
+        if (index >= sMaxIndex)
+            return PxAllocator().deallocate(chunk);
 
-	index -= sMinIndex;
+        Mutex::ScopedLock lock(getTempAllocMutex());
 
-	AllocFreeTable& freeTable = getTempAllocFreeTable();
+        index -= sMinIndex;
 
-	if(freeTable.size() <= index)
-		freeTable.resize(index + 1);
+        AllocFreeTable& freeTable = getTempAllocFreeTable();
 
-	chunk->mNext = freeTable[index];
-	freeTable[index] = chunk;
-}
+        if (freeTable.size() <= index)
+            freeTable.resize(index + 1);
+
+        chunk->mNext = freeTable[index];
+        freeTable[index] = chunk;
+    }
 
 } // namespace physx
 
@@ -131,15 +132,15 @@ using namespace physx;
 
 void deallocateTempBufferAllocations(AllocFreeTable& mTempAllocFreeTable)
 {
-	PxAllocator alloc;
-	for(PxU32 i = 0; i < mTempAllocFreeTable.size(); ++i)
-	{
-		for(PxTempAllocatorChunk* ptr = mTempAllocFreeTable[i]; ptr;)
-		{
-			PxTempAllocatorChunk* next = ptr->mNext;
-			alloc.deallocate(ptr);
-			ptr = next;
-		}
-	}
-	mTempAllocFreeTable.reset();
+    PxAllocator alloc;
+    for (PxU32 i = 0; i < mTempAllocFreeTable.size(); ++i)
+    {
+        for (PxTempAllocatorChunk* ptr = mTempAllocFreeTable[i]; ptr;)
+        {
+            PxTempAllocatorChunk* next = ptr->mNext;
+            alloc.deallocate(ptr);
+            ptr = next;
+        }
+    }
+    mTempAllocFreeTable.reset();
 }
