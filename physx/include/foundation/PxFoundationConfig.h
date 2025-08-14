@@ -31,22 +31,20 @@
 
 #include "foundation/PxPreprocessor.h"
 
-
 #if defined PX_PHYSX_STATIC_LIB
-	#define PX_FOUNDATION_API
+#define PX_FOUNDATION_API
 #else
-	#if PX_WINDOWS_FAMILY && !PX_CUDA_COMPILER
-		#if defined PX_PHYSX_FOUNDATION_EXPORTS
-			#define PX_FOUNDATION_API __declspec(dllexport)
-		#else
-			#define PX_FOUNDATION_API __declspec(dllimport)
-		#endif
-	#elif PX_UNIX_FAMILY
-		#define PX_FOUNDATION_API PX_UNIX_EXPORT
-	#else
-		#define PX_FOUNDATION_API
-	#endif
-#endif 
+#if PX_WINDOWS_FAMILY && !PX_CUDA_COMPILER
+#if defined PX_PHYSX_FOUNDATION_EXPORTS
+#define PX_FOUNDATION_API
+#else
+#define PX_FOUNDATION_API
+#endif
+#elif PX_UNIX_FAMILY
+#define PX_FOUNDATION_API PX_UNIX_EXPORT
+#else
+#define PX_FOUNDATION_API
+#endif
+#endif
 
-
-#endif 
+#endif

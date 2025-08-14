@@ -30,8 +30,8 @@ cmake_minimum_required(VERSION 3.16)
 PROJECT(PhysX C CXX CUDA)
 
 IF(DEFINED ENV{PM_winsdk_PATH} AND NOT "$ENV{PM_winsdk_PATH}" STREQUAL "" AND DEFINED ENV{PM_msvc_PATH} AND NOT "$ENV{PM_msvc_PATH}" STREQUAL "")
-	SET(CMAKE_VS_SDK_INCLUDE_DIRECTORIES "$ENV{PM_winsdk_PATH}/include/ucrt;$ENV{PM_winsdk_PATH}/include/um;$ENV{PM_winsdk_PATH}/include/shared")
-	SET(CMAKE_VS_SDK_LIBRARY_DIRECTORIES "$ENV{PM_winsdk_PATH}/lib/ucrt/x64;$ENV{PM_winsdk_PATH}/lib/um/x64;$ENV{VCToolsInstallDir}/lib/x64;$ENV{VCToolsInstallDir}/atlmfc/lib/x64")
+    SET(CMAKE_VS_SDK_INCLUDE_DIRECTORIES "$ENV{PM_winsdk_PATH}/include/ucrt;$ENV{PM_winsdk_PATH}/include/um;$ENV{PM_winsdk_PATH}/include/shared")
+    SET(CMAKE_VS_SDK_LIBRARY_DIRECTORIES "$ENV{PM_winsdk_PATH}/lib/ucrt/x64;$ENV{PM_winsdk_PATH}/lib/um/x64;$ENV{VCToolsInstallDir}/lib/x64;$ENV{VCToolsInstallDir}/atlmfc/lib/x64")
 ENDIF()
 
 OPTION(PX_GENERATE_GPU_STATIC_LIBRARIES "Generate PhysXGPU static libraries" OFF)
@@ -41,11 +41,11 @@ CMAKE_POLICY(SET CMP0057 NEW) # Enable IN_LIST
 
 # This is required to be defined by external callers!
 IF(NOT DEFINED PHYSX_ROOT_DIR)
-	MESSAGE(FATAL_ERROR "PHYSX_ROOT_DIR variable wasn't set.")
+    MESSAGE(FATAL_ERROR "PHYSX_ROOT_DIR variable wasn't set.")
 ENDIF()
 
 IF(NOT EXISTS ${PHYSX_ROOT_DIR})
-	MESSAGE(FATAL_ERROR "PHYSX_ROOT_DIR variable was invalid.")
+    MESSAGE(FATAL_ERROR "PHYSX_ROOT_DIR variable was invalid.")
 ENDIF()
 
 INCLUDE(NvidiaBuildOptions)
@@ -54,23 +54,23 @@ INCLUDE(SetCudaArch)
 SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 IF(CMAKE_CONFIGURATION_TYPES)
-	SET(CMAKE_CONFIGURATION_TYPES debug checked profile release)
-	SET(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
-		"Reset config to what we need"
-		FORCE)
+    SET(CMAKE_CONFIGURATION_TYPES debug checked profile release)
+    SET(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
+        "Reset config to what we need"
+        FORCE)
 
-	# Need to define these at least once.
-	SET(CMAKE_SHARED_LINKER_FLAGS_CHECKED "/DEBUG")
-	SET(CMAKE_SHARED_LINKER_FLAGS_PROFILE "/DEBUG")
-	SET(CMAKE_EXE_LINKER_FLAGS_PROFILE "/DEBUG")
-	SET(CMAKE_EXE_LINKER_FLAGS_CHECKED "/DEBUG")
+    # Need to define these at least once.
+    SET(CMAKE_SHARED_LINKER_FLAGS_CHECKED "/DEBUG")
+    SET(CMAKE_SHARED_LINKER_FLAGS_PROFILE "/DEBUG")
+    SET(CMAKE_EXE_LINKER_FLAGS_PROFILE "/DEBUG")
+    SET(CMAKE_EXE_LINKER_FLAGS_CHECKED "/DEBUG")
 ENDIF()
 
 SET(PROJECT_CMAKE_FILES_DIR source/compiler/cmakegpu)
 SET(PLATFORM_CMAKELISTS ${PHYSX_ROOT_DIR}/${PROJECT_CMAKE_FILES_DIR}/${TARGET_BUILD_PLATFORM}/CMakeLists.txt)
 
 IF(NOT EXISTS ${PLATFORM_CMAKELISTS})
-	MESSAGE(FATAL_ERROR "Unable to find platform CMakeLists.txt for ${TARGET_BUILD_PLATFORM} at ${PLATFORM_CMAKELISTS}")
+    MESSAGE(FATAL_ERROR "Unable to find platform CMakeLists.txt for ${TARGET_BUILD_PLATFORM} at ${PLATFORM_CMAKELISTS}")
 ENDIF()
 
 SET(SOURCE_DISTRO_FILE_LIST "")
@@ -85,10 +85,10 @@ SET(SOURCE_DISTRO_FILE_LIST "")
 # since that's the default set in: compiler\internal\CMakeLists.txt (using CMAKE_CUDA_ARCHITECTURES)
 # see policy CMP0104
 IF(PX_GENERATE_GPU_REDUCED_ARCHITECTURES)
-	GENERATE_ARCH_CODE_LIST(SASS "80,86,89,90,100,120" PTX "120")
+    GENERATE_ARCH_CODE_LIST(SASS "80,86,89,90,100,120" PTX "120")
 ELSE()
-	# Volta is the minimum compute arch required because NGC supports V100
-	GENERATE_ARCH_CODE_LIST(SASS "70,80,86,89,90,100,120" PTX "120")
+    # Volta is the minimum compute arch required because NGC supports V100
+    GENERATE_ARCH_CODE_LIST(SASS "70,80,86,89,90,100,120" PTX "120")
 ENDIF()
 
 # Force response files off because clangd does not parse them
@@ -102,7 +102,7 @@ SET(PHYSX_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Werror=all-warnings -use_fast_math -f
 INCLUDE(${PHYSX_ROOT_DIR}/${PROJECT_CMAKE_FILES_DIR}/${TARGET_BUILD_PLATFORM}/CMakeLists.txt)
 
 IF(PX_GENERATE_SOURCE_DISTRO)
-	FOREACH(FILE_NAME ${SOURCE_DISTRO_FILE_LIST})
-		FILE(APPEND "${CMAKE_CURRENT_BINARY_DIR}/source_distro_list.txt" "${FILE_NAME}\n")
-	ENDFOREACH()
+    FOREACH(FILE_NAME ${SOURCE_DISTRO_FILE_LIST})
+        FILE(APPEND "${CMAKE_CURRENT_BINARY_DIR}/source_distro_list.txt" "${FILE_NAME}\n")
+    ENDFOREACH()
 ENDIF()
