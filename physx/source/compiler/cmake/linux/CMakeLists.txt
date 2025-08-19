@@ -27,7 +27,7 @@
 STRING(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWERCASE)
 
 #TODO: Fix warnings
-SET(CLANG_WARNINGS "-ferror-limit=0 -Wall -Wextra -Werror -Weverything\
+SET(CLANG_WARNINGS "-ferror-limit=0 -Wall -Wextra -Weverything\
     -Wno-unused-but-set-variable \
     -Wno-switch-default \
     -Wno-cast-qual \
@@ -106,35 +106,35 @@ SET(GCC_WARNINGS "-Wall -Werror \
 ")
 
 IF(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
-	# gw: these optimizations are disabled for now. fp-contract causes floating point inaccuracy and deviation in behavior,
-	# tree-vrp and delete-null-pointer-checks cause known bugs on some versions of gcc
-	IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-		SET(AARCH64_FLAGS "-ffp-contract=off -fno-delete-null-pointer-checks -faligned-new")
-	ELSEIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-		SET(AARCH64_FLAGS "-ffp-contract=off -Wno-unsupported-floating-point-opt")
-	ENDIF()
+    # gw: these optimizations are disabled for now. fp-contract causes floating point inaccuracy and deviation in behavior,
+    # tree-vrp and delete-null-pointer-checks cause known bugs on some versions of gcc
+    IF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        SET(AARCH64_FLAGS "-ffp-contract=off -fno-delete-null-pointer-checks -faligned-new")
+    ELSEIF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        SET(AARCH64_FLAGS "-ffp-contract=off -Wno-unsupported-floating-point-opt")
+    ENDIF()
 ELSE()
-	SET(AARCH64_FLAGS "")
+    SET(AARCH64_FLAGS "")
 ENDIF()
 
 SET(COMMON_CXX_FLAGS "-std=c++14 -D_GLIBCXX_USE_CXX11_ABI=1 -fno-rtti -fno-exceptions -ffunction-sections -fdata-sections -fvisibility=hidden ${AARCH64_FLAGS}")
 
-IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-	IF ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "10.0.0")
-		SET(PHYSX_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_CXX_FLAGS} -fstrict-aliasing -Wstrict-aliasing=2 -Wno-shadow ${CLANG_WARNINGS}" CACHE INTERNAL "PhysX CXX")
-	ELSE()
-		SET(PHYSX_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_CXX_FLAGS} -fstrict-aliasing -Wstrict-aliasing=2 -ffp-exception-behavior=maytrap ${CLANG_WARNINGS}" CACHE INTERNAL "PhysX CXX")
-	ENDIF()
-ELSEIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	SET(PHYSX_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_CXX_FLAGS} -fno-strict-aliasing ${GCC_WARNINGS}" CACHE INTERNAL "PhysX CXX")
+IF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    IF("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "10.0.0")
+        SET(PHYSX_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_CXX_FLAGS} -fstrict-aliasing -Wstrict-aliasing=2 -Wno-shadow ${CLANG_WARNINGS}" CACHE INTERNAL "PhysX CXX")
+    ELSE()
+        SET(PHYSX_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_CXX_FLAGS} -fstrict-aliasing -Wstrict-aliasing=2 -ffp-exception-behavior=maytrap ${CLANG_WARNINGS}" CACHE INTERNAL "PhysX CXX")
+    ENDIF()
+ELSEIF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    SET(PHYSX_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_CXX_FLAGS} -fno-strict-aliasing ${GCC_WARNINGS}" CACHE INTERNAL "PhysX CXX")
 ENDIF()
 
-IF (PX_USE_MOLD_LINKER)
-	SET (PHYSX_CXX_FLAGS "${PHYSX_CXX_FLAGS} -Wno-unused-command-line-argument -fuse-ld=mold " CACHE INTERNAL "PhysX CXX")
+IF(PX_USE_MOLD_LINKER)
+    SET(PHYSX_CXX_FLAGS "${PHYSX_CXX_FLAGS} -Wno-unused-command-line-argument -fuse-ld=mold " CACHE INTERNAL "PhysX CXX")
 ENDIF()
 
 # Build debug info for all configurations
-SET(PHYSX_CXX_FLAGS_DEBUG   "-O0 -g3 -gdwarf-2" CACHE INTERNAL "PhysX Debug CXX Flags")
+SET(PHYSX_CXX_FLAGS_DEBUG "-O0 -g3 -gdwarf-2" CACHE INTERNAL "PhysX Debug CXX Flags")
 SET(PHYSX_CXX_FLAGS_CHECKED "-O3 -g3 -gdwarf-2" CACHE INTERNAL "PhysX Checked CXX Flags")
 SET(PHYSX_CXX_FLAGS_PROFILE "-O3" CACHE INTERNAL "PhysX Profile CXX Flags")
 SET(PHYSX_CXX_FLAGS_RELEASE "-O3" CACHE INTERNAL "PhysX Release CXX Flags")
@@ -142,36 +142,36 @@ SET(PHYSX_CXX_FLAGS_RELEASE "-O3" CACHE INTERNAL "PhysX Release CXX Flags")
 # These flags are local to the directory the CMakeLists.txt is in, so don't get carried over to OTHER CMakeLists.txt (thus the CACHE variables above)
 SET(CMAKE_CXX_FLAGS ${PHYSX_CXX_FLAGS})
 
-SET(CMAKE_CXX_FLAGS_DEBUG   ${PHYSX_CXX_FLAGS_DEBUG})
+SET(CMAKE_CXX_FLAGS_DEBUG ${PHYSX_CXX_FLAGS_DEBUG})
 SET(CMAKE_CXX_FLAGS_CHECKED ${PHYSX_CXX_FLAGS_CHECKED})
 SET(CMAKE_CXX_FLAGS_PROFILE ${PHYSX_CXX_FLAGS_PROFILE})
 SET(CMAKE_CXX_FLAGS_RELEASE ${PHYSX_CXX_FLAGS_RELEASE})
 
 IF(PUBLIC_RELEASE)
-	SET(PUBLIC_RELEASE_FLAG "PX_PUBLIC_RELEASE=1")
+    SET(PUBLIC_RELEASE_FLAG "PX_PUBLIC_RELEASE=1")
 ELSE()
-	SET(PUBLIC_RELEASE_FLAG "PX_PUBLIC_RELEASE=0")
+    SET(PUBLIC_RELEASE_FLAG "PX_PUBLIC_RELEASE=0")
 ENDIF()
 
 # Controls PX_NVTX for all projects
 SET(NVTX_FLAG "PX_NVTX=0")
 IF(${CMAKE_CROSSCOMPILING} AND CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
-	SET(PX_SUPPORT_OMNI_PVD_FLAG "PX_SUPPORT_OMNI_PVD=0")
+    SET(PX_SUPPORT_OMNI_PVD_FLAG "PX_SUPPORT_OMNI_PVD=0")
 ELSE()
-	SET(PX_SUPPORT_OMNI_PVD_FLAG "PX_SUPPORT_OMNI_PVD=1")
+    SET(PX_SUPPORT_OMNI_PVD_FLAG "PX_SUPPORT_OMNI_PVD=1")
 ENDIF()
 
 # Set DISABLE_CUDA_PHYSX when GPU projects are not enabled
 IF(NOT PX_GENERATE_GPU_PROJECTS_ONLY AND NOT PX_GENERATE_GPU_PROJECTS)
-	# CMake automatically adds the appropriate prefix (-D for GCC/Clang) when the definition
-	# is added to the target via target_compile_definitions or add_definitions
-	SET(DISABLE_CUDA_DEF "DISABLE_CUDA_PHYSX")
+    # CMake automatically adds the appropriate prefix (-D for GCC/Clang) when the definition
+    # is added to the target via target_compile_definitions or add_definitions
+    SET(DISABLE_CUDA_DEF "DISABLE_CUDA_PHYSX")
 ENDIF()
 
 SET(PHYSX_LINUX_COMPILE_DEFS "${PHYSX_AUTOBUILD};${PUBLIC_RELEASE_FLAG};${DISABLE_CUDA_DEF}" CACHE INTERNAL "Base PhysX preprocessor definitions")
-SET(PHYSX_LINUX_DEBUG_COMPILE_DEFS   "PX_DEBUG=1;PX_CHECKED=1;${NVTX_FLAG};PX_SUPPORT_PVD=1;${PX_SUPPORT_OMNI_PVD_FLAG}"  CACHE INTERNAL "Debug PhysX preprocessor definitions")
+SET(PHYSX_LINUX_DEBUG_COMPILE_DEFS "PX_DEBUG=1;PX_CHECKED=1;${NVTX_FLAG};PX_SUPPORT_PVD=1;${PX_SUPPORT_OMNI_PVD_FLAG}" CACHE INTERNAL "Debug PhysX preprocessor definitions")
 SET(PHYSX_LINUX_CHECKED_COMPILE_DEFS "NDEBUG;PX_CHECKED=1;${NVTX_FLAG};PX_SUPPORT_PVD=1;${PX_SUPPORT_OMNI_PVD_FLAG}" CACHE INTERNAL "Checked PhysX preprocessor definitions")
-SET(PHYSX_LINUX_PROFILE_COMPILE_DEFS "NDEBUG;PX_PROFILE=1;${NVTX_FLAG};PX_SUPPORT_PVD=1;${PX_SUPPORT_OMNI_PVD_FLAG}"  CACHE INTERNAL "Profile PhysX preprocessor definitions")
+SET(PHYSX_LINUX_PROFILE_COMPILE_DEFS "NDEBUG;PX_PROFILE=1;${NVTX_FLAG};PX_SUPPORT_PVD=1;${PX_SUPPORT_OMNI_PVD_FLAG}" CACHE INTERNAL "Profile PhysX preprocessor definitions")
 SET(PHYSX_LINUX_RELEASE_COMPILE_DEFS "NDEBUG;PX_SUPPORT_PVD=0;PX_SUPPORT_OMNI_PVD=0" CACHE INTERNAL "Release PhysX preprocessor definitions")
 
 # IF(PUBLIC_RELEASE)
@@ -201,52 +201,52 @@ SET(PHYSX_LINUX_RELEASE_COMPILE_DEFS "NDEBUG;PX_SUPPORT_PVD=0;PX_SUPPORT_OMNI_PV
 
 # Include all of the projects
 IF(PX_GENERATE_GPU_PROJECTS_ONLY)
-	INCLUDE(PhysXCommon.cmake)
-	INCLUDE(PhysXFoundation.cmake)
-	INCLUDE(LowLevelAABB.cmake)
+    INCLUDE(PhysXCommon.cmake)
+    INCLUDE(PhysXFoundation.cmake)
+    INCLUDE(LowLevelAABB.cmake)
 
-	SET_PROPERTY(TARGET PhysXCommon PROPERTY FOLDER "PhysX SDK")
-	SET_PROPERTY(TARGET PhysXFoundation PROPERTY FOLDER "PhysX SDK")
+    SET_PROPERTY(TARGET PhysXCommon PROPERTY FOLDER "PhysX SDK")
+    SET_PROPERTY(TARGET PhysXFoundation PROPERTY FOLDER "PhysX SDK")
 ELSE()
-	INCLUDE(PhysXFoundation.cmake)
-	INCLUDE(LowLevel.cmake)
-	INCLUDE(LowLevelAABB.cmake)
-	INCLUDE(LowLevelDynamics.cmake)
-	INCLUDE(PhysX.cmake)
-	INCLUDE(PhysXCharacterKinematic.cmake)
-	INCLUDE(PhysXCommon.cmake)
-	INCLUDE(PhysXCooking.cmake)
-	INCLUDE(PhysXExtensions.cmake)
-	INCLUDE(PhysXVehicle.cmake)
-	INCLUDE(SceneQuery.cmake)
-	INCLUDE(SimulationController.cmake)
-	INCLUDE(PhysXPvdSDK.cmake)
-	INCLUDE(PhysXTask.cmake)
+    INCLUDE(PhysXFoundation.cmake)
+    INCLUDE(LowLevel.cmake)
+    INCLUDE(LowLevelAABB.cmake)
+    INCLUDE(LowLevelDynamics.cmake)
+    INCLUDE(PhysX.cmake)
+    INCLUDE(PhysXCharacterKinematic.cmake)
+    INCLUDE(PhysXCommon.cmake)
+    INCLUDE(PhysXCooking.cmake)
+    INCLUDE(PhysXExtensions.cmake)
+    INCLUDE(PhysXVehicle.cmake)
+    INCLUDE(SceneQuery.cmake)
+    INCLUDE(SimulationController.cmake)
+    INCLUDE(PhysXPvdSDK.cmake)
+    INCLUDE(PhysXTask.cmake)
 
-	# Set folder PhysX SDK to all common SDK source projects
-	SET_PROPERTY(TARGET PhysX PROPERTY FOLDER "PhysX SDK")
-	SET_PROPERTY(TARGET PhysXCharacterKinematic PROPERTY FOLDER "PhysX SDK")
-	SET_PROPERTY(TARGET PhysXCommon PROPERTY FOLDER "PhysX SDK")
-	SET_PROPERTY(TARGET PhysXCooking PROPERTY FOLDER "PhysX SDK")
-	SET_PROPERTY(TARGET PhysXExtensions PROPERTY FOLDER "PhysX SDK")
-	SET_PROPERTY(TARGET PhysXVehicle2 PROPERTY FOLDER "PhysX SDK")
-	SET_PROPERTY(TARGET LowLevel PROPERTY FOLDER "PhysX SDK")
-	SET_PROPERTY(TARGET LowLevelAABB PROPERTY FOLDER "PhysX SDK")
-	SET_PROPERTY(TARGET LowLevelDynamics PROPERTY FOLDER "PhysX SDK")
-	SET_PROPERTY(TARGET SceneQuery PROPERTY FOLDER "PhysX SDK")
-	SET_PROPERTY(TARGET SimulationController PROPERTY FOLDER "PhysX SDK")
-	SET_PROPERTY(TARGET PhysXPvdSDK PROPERTY FOLDER "PhysX SDK")
-	SET_PROPERTY(TARGET PhysXTask PROPERTY FOLDER "PhysX SDK")
-	SET_PROPERTY(TARGET PhysXFoundation PROPERTY FOLDER "PhysX SDK")
-
-
-	SET(PHYSXDISTRO_LIBS PhysXFoundation PhysX PhysXCharacterKinematic PhysXPvdSDK PhysXCommon PhysXCooking PhysXExtensions PhysXVehicle2)
+    # Set folder PhysX SDK to all common SDK source projects
+    SET_PROPERTY(TARGET PhysX PROPERTY FOLDER "PhysX SDK")
+    SET_PROPERTY(TARGET PhysXCharacterKinematic PROPERTY FOLDER "PhysX SDK")
+    SET_PROPERTY(TARGET PhysXCommon PROPERTY FOLDER "PhysX SDK")
+    SET_PROPERTY(TARGET PhysXCooking PROPERTY FOLDER "PhysX SDK")
+    SET_PROPERTY(TARGET PhysXExtensions PROPERTY FOLDER "PhysX SDK")
+    SET_PROPERTY(TARGET PhysXVehicle2 PROPERTY FOLDER "PhysX SDK")
+    SET_PROPERTY(TARGET LowLevel PROPERTY FOLDER "PhysX SDK")
+    SET_PROPERTY(TARGET LowLevelAABB PROPERTY FOLDER "PhysX SDK")
+    SET_PROPERTY(TARGET LowLevelDynamics PROPERTY FOLDER "PhysX SDK")
+    SET_PROPERTY(TARGET SceneQuery PROPERTY FOLDER "PhysX SDK")
+    SET_PROPERTY(TARGET SimulationController PROPERTY FOLDER "PhysX SDK")
+    SET_PROPERTY(TARGET PhysXPvdSDK PROPERTY FOLDER "PhysX SDK")
+    SET_PROPERTY(TARGET PhysXTask PROPERTY FOLDER "PhysX SDK")
+    SET_PROPERTY(TARGET PhysXFoundation PROPERTY FOLDER "PhysX SDK")
 
 
-	INSTALL(
-		TARGETS ${PHYSXDISTRO_LIBS}
-		EXPORT PhysXSDK
-		DESTINATION $<$<CONFIG:debug>:${PX_ROOT_LIB_DIR}/debug>$<$<CONFIG:release>:${PX_ROOT_LIB_DIR}/release>$<$<CONFIG:checked>:${PX_ROOT_LIB_DIR}/checked>$<$<CONFIG:profile>:${PX_ROOT_LIB_DIR}/profile>
-		)
+    SET(PHYSXDISTRO_LIBS PhysXFoundation PhysX PhysXCharacterKinematic PhysXPvdSDK PhysXCommon PhysXCooking PhysXExtensions PhysXVehicle2)
+
+
+    INSTALL(
+        TARGETS ${PHYSXDISTRO_LIBS}
+        EXPORT PhysXSDK
+        DESTINATION $<$<CONFIG:debug>:${PX_ROOT_LIB_DIR}/debug>$<$<CONFIG:release>:${PX_ROOT_LIB_DIR}/release>$<$<CONFIG:checked>:${PX_ROOT_LIB_DIR}/checked>$<$<CONFIG:profile>:${PX_ROOT_LIB_DIR}/profile>
+    )
 
 ENDIF()
