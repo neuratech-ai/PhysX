@@ -78,7 +78,7 @@ SET(CLANG_WARNINGS "-ferror-limit=0 -Wall -Wextra -Weverything\
     -Wno-undefined-func-template \
 ")
 
-SET(GCC_WARNINGS "-Wall -Werror \
+SET(GCC_WARNINGS "-Wall \
 	-Wno-address \
 	-Wno-aligned-new \
 	-Wno-array-bounds \

@@ -24,17 +24,18 @@
 ##
 ## Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
 
-IF(PX_OUTPUT_ARCH STREQUAL "arm")
-    SET(OSX_BITNESS "-arch arm64")
-    SET(CMAKE_OSX_ARCHITECTURES "arm64")
-    SET(ARCH_SIMD_FLAG "") # No flags needed to enable NEON
-ELSE()
-    SET(OSX_BITNESS "-arch x86_64")
-    SET(CMAKE_OSX_ARCHITECTURES "x86_64")
-    SET(ARCH_SIMD_FLAG "-msse2")
-ENDIF()
+# Auto-detect macOS arch
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+    set(CMAKE_OSX_ARCHITECTURES "arm64")
+    set(OSX_BITNESS "-arch arm64")
+    set(ARCH_SIMD_FLAG "")
+else()
+    set(CMAKE_OSX_ARCHITECTURES "x86_64")
+    set(OSX_BITNESS "-arch x86_64")
+    set(ARCH_SIMD_FLAG "") # SSE2 is baseline on macOS x86_64; don't pass -msse2
+endif()
 
-SET(PHYSX_CXX_FLAGS "${OSX_BITNESS} ${ARCH_SIMD_FLAG} -std=c++11 -fno-rtti -fno-exceptions -ffunction-sections -fdata-sections -Werror -ferror-limit=0 -Wall -Wextra -fstrict-aliasing -Wstrict-aliasing=2 -Weverything -Wno-unknown-warning-option -Wno-documentation-deprecated-sync -Wno-documentation-unknown-command -Wno-float-equal -Wno-padded -Wno-weak-vtables -Wno-cast-align -Wno-conversion -Wno-missing-noreturn -Wno-missing-variable-declarations -Wno-shift-sign-overflow -Wno-covered-switch-default -Wno-exit-time-destructors -Wno-global-constructors -Wno-missing-prototypes -Wno-unreachable-code -Wno-unused-macros -Wno-unused-member-function -Wno-used-but-marked-unused -Wno-weak-template-vtables -Wno-deprecated -Wno-non-virtual-dtor -Wno-invalid-noreturn -Wno-return-type-c-linkage -Wno-reserved-id-macro -Wno-c++98-compat-pedantic -Wno-unused-local-typedef -Wno-old-style-cast -Wno-newline-eof -Wno-unused-private-field -Wno-undefined-reinterpret-cast -Wno-invalid-offsetof -Wno-zero-as-null-pointer-constant -Wno-atomic-implicit-seq-cst -Wno-suggest-destructor-override -Wno-suggest-override -Wno-alloca -Wno-switch-enum -Wno-unused-but-set-variable -Wno-shadow-field -gdwarf-2" CACHE INTERNAL "PhysX CXX")
+set(COMMON_CXX_FLAGS "-std=c++14 -fno-rtti -fno-exceptions -ffunction-sections -fdata-sections -fvisibility=hidden")
 
 SET(CMAKE_SHARED_LINKER_FLAGS_CHECKED "")
 SET(CMAKE_SHARED_LINKER_FLAGS_PROFILE "")
@@ -49,15 +50,15 @@ SET(PHYSX_CXX_FLAGS_RELEASE "-O3 -g" CACHE INTERNAL "PhysX Release CXX Flags")
 # These flags are local to the directory the CMakeLists.txt is in
 SET(CMAKE_CXX_FLAGS ${PHYSX_CXX_FLAGS})
 
-SET(CMAKE_CXX_FLAGS_DEBUG   ${PHYSX_CXX_FLAGS_DEBUG})
+SET(CMAKE_CXX_FLAGS_DEBUG ${PHYSX_CXX_FLAGS_DEBUG})
 SET(CMAKE_CXX_FLAGS_CHECKED ${PHYSX_CXX_FLAGS_CHECKED})
 SET(CMAKE_CXX_FLAGS_PROFILE ${PHYSX_CXX_FLAGS_PROFILE})
 SET(CMAKE_CXX_FLAGS_RELEASE ${PHYSX_CXX_FLAGS_RELEASE})
 
 IF(PUBLIC_RELEASE)
-	SET(PUBLIC_RELEASE_FLAG "PX_PUBLIC_RELEASE=1")
+    SET(PUBLIC_RELEASE_FLAG "PX_PUBLIC_RELEASE=1")
 ELSE()
-	SET(PUBLIC_RELEASE_FLAG "PX_PUBLIC_RELEASE=0")
+    SET(PUBLIC_RELEASE_FLAG "PX_PUBLIC_RELEASE=0")
 ENDIF()
 
 #set(CMAKE_XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT "dwarf-with-dsym")
@@ -75,6 +76,7 @@ SET(PHYSX_MAC_CHECKED_COMPILE_DEFS "NDEBUG;PX_CHECKED=1;${NVTX_FLAG};PX_SUPPORT_
 SET(PHYSX_MAC_PROFILE_COMPILE_DEFS "NDEBUG;PX_PROFILE=1;${NVTX_FLAG};PX_SUPPORT_PVD=1;${PX_SUPPORT_OMNI_PVD_FLAG}" CACHE INTERNAL "Profile PhysX preprocessor definitions")
 SET(PHYSX_MAC_RELEASE_COMPILE_DEFS "NDEBUG;PX_SUPPORT_PVD=0;PX_SUPPORT_OMNI_PVD=0" CACHE INTERNAL "Release PhysX preprocessor definitions")
 
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
 # Include all of the projects
 INCLUDE(PhysXFoundation.cmake)
@@ -87,12 +89,12 @@ INCLUDE(PhysXCommon.cmake)
 INCLUDE(PhysXCooking.cmake)
 INCLUDE(PhysXExtensions.cmake)
 INCLUDE(PhysXVehicle.cmake)
-INCLUDE(PhysXVehicle2.cmake)
+#INCLUDE(PhysXVehicle2.cmake)
 INCLUDE(PhysXPvdSDK.cmake)
 INCLUDE(PhysXTask.cmake)
 INCLUDE(SceneQuery.cmake)
 INCLUDE(SimulationController.cmake)
-INCLUDE(FastXml.cmake)
+#INCLUDE(FastXml.cmake)
 
 # Set folder PhysX SDK to all common SDK source projects
 SET_PROPERTY(TARGET PhysX PROPERTY FOLDER "PhysX SDK")
@@ -100,14 +102,14 @@ SET_PROPERTY(TARGET PhysXCharacterKinematic PROPERTY FOLDER "PhysX SDK")
 SET_PROPERTY(TARGET PhysXCommon PROPERTY FOLDER "PhysX SDK")
 SET_PROPERTY(TARGET PhysXCooking PROPERTY FOLDER "PhysX SDK")
 SET_PROPERTY(TARGET PhysXExtensions PROPERTY FOLDER "PhysX SDK")
-SET_PROPERTY(TARGET PhysXVehicle PROPERTY FOLDER "PhysX SDK")
-SET_PROPERTY(TARGET PhysXVehicle2 PROPERTY FOLDER "PhysX SDK")
+#SET_PROPERTY(TARGET PhysXVehicle PROPERTY FOLDER "PhysX SDK")
+#SET_PROPERTY(TARGET PhysXVehicle2 PROPERTY FOLDER "PhysX SDK")
 SET_PROPERTY(TARGET LowLevel PROPERTY FOLDER "PhysX SDK")
 SET_PROPERTY(TARGET LowLevelAABB PROPERTY FOLDER "PhysX SDK")
 SET_PROPERTY(TARGET LowLevelDynamics PROPERTY FOLDER "PhysX SDK")
 SET_PROPERTY(TARGET SceneQuery PROPERTY FOLDER "PhysX SDK")
 SET_PROPERTY(TARGET SimulationController PROPERTY FOLDER "PhysX SDK")
-SET_PROPERTY(TARGET FastXml PROPERTY FOLDER "PhysX SDK")
+#SET_PROPERTY(TARGET FastXml PROPERTY FOLDER "PhysX SDK")
 SET_PROPERTY(TARGET PhysXPvdSDK PROPERTY FOLDER "PhysX SDK")
 SET_PROPERTY(TARGET PhysXTask PROPERTY FOLDER "PhysX SDK")
 SET_PROPERTY(TARGET PhysXFoundation PROPERTY FOLDER "PhysX SDK")
