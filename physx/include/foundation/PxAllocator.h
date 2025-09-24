@@ -209,11 +209,13 @@ namespace physx
 		{
 			if(!reportAllocationNames)
 				return "<allocation names disabled>";
-#if PX_GCC_FAMILY
+#if PX_GCC_FAMILY || PX_CLANG || defined(__clang__)
 			return __PRETTY_FUNCTION__;
+#elif defined(_MSC_VER)
+			return __FUNCSIG__;
 #else
 			// name() calls malloc(), raw_name() wouldn't
-			return typeid(T).name();
+			return "unknown type";
 #endif
 		}
 

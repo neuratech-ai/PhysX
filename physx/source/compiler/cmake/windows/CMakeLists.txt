@@ -43,7 +43,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     # Common flags (rough equivalents to your MSVC intentions)
     # -Wall -Wextra ~ /W4, -Werror ~ /WX, -fno-rtti ~ /GR-, -fomit-frame-pointer ~ /Oy
     # function/data sections + gc-sections let linker drop unused code (/OPT:REF analog)
-    set(PHYSX_COMMON_FLAGS "")
+    set(PHYSX_COMMON_FLAGS "-fno-rtti")
     set(PHYSX_COMMON_FLAGS_DEBUG "")
     set(PHYSX_COMMON_FLAGS_CHECKED "")
     set(PHYSX_COMMON_FLAGS_PROFILE "")
@@ -101,7 +101,7 @@ else()
     # Common Flags
     # PT: changed /Ox to /O2 because "the /Ox compiler option enables only a subset of the speed optimization options enabled by /O2."
     # See https://docs.microsoft.com/en-us/cpp/build/reference/ox-full-optimization?view=vs-2019
-    SET(PHYSX_COMMON_FLAGS "/std:c++14 /d2Zi+ /MP /WX /W4 /GF /GS- /Gd ${PHYSX_FP_MODE} /Oy ${PHYSX_WARNING_DISABLES}")
+    SET(PHYSX_COMMON_FLAGS "/std:c++14 /d2Zi+ /MP /WX /W4 /GF /GS- /GR- /Gd ${PHYSX_FP_MODE} /Oy ${PHYSX_WARNING_DISABLES}")
     SET(PHYSX_COMMON_FLAGS_DEBUG "/Od ${WINCRT_DEBUG} /RTCu /Zi")
     SET(PHYSX_COMMON_FLAGS_CHECKED "/O2 ${WINCRT_NDEBUG} /Zi")
     SET(PHYSX_COMMON_FLAGS_PROFILE "/O2 ${WINCRT_NDEBUG} /Zi")

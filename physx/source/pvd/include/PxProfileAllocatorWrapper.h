@@ -71,12 +71,14 @@ namespace physx { namespace profile {
 	{
 		static const char* getName()
 		{
-#if PX_LINUX || PX_OSX || PX_EMSCRIPTEN || PX_SWITCH
-			return __PRETTY_FUNCTION__;
+#if PX_LINUX || PX_OSX || PX_EMSCRIPTEN || PX_SWITCH || defined(__clang__)
+            return __PRETTY_FUNCTION__;
+#elif defined(_MSC_VER)
+            return __FUNCSIG__;
 #else
-			return typeid(T).name();
+            return "unknown_type";
 #endif
-		}
+        }
 		PxProfileAllocatorWrapper* mWrapper;
 
 	public:
